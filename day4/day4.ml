@@ -101,7 +101,8 @@ let reset_board b =
       Array.iteri ~f:(fun y (_,i) ->
           c.(y) <- (false,i)
         ) c;
-    ) b.grid
+    ) b.grid;
+    b.win <- false
 
 let reset_boards boards =
   List.iter ~f:reset_board boards
