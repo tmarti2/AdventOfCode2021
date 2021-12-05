@@ -43,30 +43,24 @@ let fill_diag map (x1,y1) (x2,y2) cpt =
   in
   next x1 y1 cpt
 
-let reset_map map =
-  Array.iter ~f:(fun c ->
-      Array.iteri ~f:(fun i _ ->
-          c.(i) <- 0
-        ) c
-    ) map
-
-let solve ~diag map data =
-  List.fold ~init:0 ~f:(fun n ((x1,y1),(x2,y2)) ->
-      if x1 = x2 then
-        fill_col map x1 y1 y2 n
-      else if y1 = y2 then
-        fill_row map y1 x1 x2 n
-      else if diag then
+let solve ~diag ?(cpt=0) map data =
+  List.fold ~init:cpt ~f:(fun n ((x1,y1),(x2,y2)) ->
+      if diag && x1 <> x2 && y1 <> y2 then
         fill_diag map (x1,y1) (x2,y2) n
-      else n
+      else begin
+        if x1 = x2 && not diag then
+          fill_col map x1 y1 y2 n
+        else if y1 = y2 && not diag then
+          fill_row map y1 x1 x2 n
+        else n
+      end
     ) data
 
 let main file =
   let data, dimx, dimy = Stdio.In_channel.read_lines file |> parse_file in
   let map = Array.make_matrix ~dimx ~dimy 0 in
   let res1 = solve ~diag:false map data in
-  reset_map map;
-  let res2 = solve ~diag:true map data in
+  let res2 = solve ~diag:true ~cpt:res1 map data in
   Stdio.printf "Part 1 : %d\npart 2 : %d\n" res1 res2
 
 
