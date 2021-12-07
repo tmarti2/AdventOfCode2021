@@ -4,15 +4,12 @@ let parse_file data =
   let l = List.hd_exn data |> String.split ~on:',' |> List.map ~f:Int.of_string in
   List.init 9 ~f:(fun i -> List.count l ~f:((=) i))
 
+let one_step = function
+  | [j0;j1;j2;j3;j4;j5;j6;j7;j8] -> [j1;j2;j3;j4;j5;j6;j0+j7;j8;j0]
+  | _ -> assert false
+
 let solve days start =
-  let rec step n l =
-    match n,l with
-    | 0, _-> l
-    | _, [j0;j1;j2;j3;j4;j5;j6;j7;j8] ->
-      step (n-1) [j1;j2;j3;j4;j5;j6;j0+j7;j8;j0]
-    | _ -> assert false
-  in
-  step days start
+  Fn.apply_n_times ~n:days one_step start
 
 let main file =
   let count = List.reduce_exn ~f:(+) in
