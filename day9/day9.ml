@@ -75,22 +75,13 @@ let solve1 data = count_low data
 let solve2 data =
   let l = find_lows data in
   let sizes = List.map l ~f:(find_bassin data) |> List.sort ~compare |> List.rev in
+  assert (List.length sizes >= 3);
   List.nth_exn sizes 0 *
   List.nth_exn sizes 1 *
   List.nth_exn sizes 2
-  (* Array.iter data ~f:(fun row ->
-    Array.iter row ~f:(fun v ->
-      match v with
-      | false, v -> Stdio.printf " %d " v
-      | true, v -> Stdio.printf "_%d " v
-    );
-    Stdio.printf "\n"
-  ) *)
-
 
   let main file =
     let data = Stdio.In_channel.read_lines file |> parse_file in
     Stdio.printf "Part 1 : %d\nPart 2 : %d\n" (solve1 data) (solve2 data)
 
-let _ = main "example.txt"
-      ; main "input.txt"
+let _ = main "example.txt"; main "input.txt"
