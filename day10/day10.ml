@@ -1,52 +1,44 @@
 open Base
 
 let score1 = function
-  | ')' -> 3
-  | ']' -> 57
-  | '}' -> 1197
-  | '>' -> 25137
-  | _ -> assert false
+  | `RParen -> 3 | `RBracket -> 57 | `RBrace -> 1197 | `RChevron -> 25137
 
 let score2 = function
-  | ')' -> 1
-  | ']' -> 2
-  | '}' -> 3
-  | '>' -> 4
-  | _ -> assert false
+  | `RParen -> 1 | `RBracket -> 2 | `RBrace -> 3 | `RChevron -> 4
 
 let find_closing = function
-  | '(' -> ')'
-  | '[' -> ']'
-  | '{' -> '}'
-  | '<' -> '>'
-  | _ -> assert false
+  | `LParen -> `RParen  | `LBracket -> `RBracket
+  | `LBrace -> `RBrace  | `LChevron -> `RChevron
 
-let partition_line line =
-  let s = Stack.create () in
-  let rec aux = function
-    | [] -> Either.First s
-    | (('(' | '[' | '{' | '<') as c) :: rest ->
-      Stack.push s (find_closing c); aux rest
-    | ((')' | ']' | '}' | '>') as c) :: rest ->
-      if Stack.is_empty s || not @@ Char.equal (Stack.pop_exn s) c then
-        Either.second c
-      else
-        aux rest
-    | _ -> assert false
-  in
-  aux (String.to_list line)
+let rec partition_line ?(stack=[]) = function
+  | [] -> Either.First stack
+  | ((`LParen | `LBracket | `LBrace | `LChevron) as c) :: rest ->
+    partition_line ~stack:(find_closing c::stack) rest
+  | ((`RParen | `RBracket | `RBrace | `RChevron) as c) :: _
+    when List.is_empty stack || Poly.((List.hd_exn stack) <> c) ->
+    Either.second c
+  | _ :: rest -> partition_line ~stack:(List.tl_exn stack) rest
 
 let solve1 l = List.sum (module Int) ~f:score1 l
 
 let solve2 l =
-  let res =
-    List.map ~f:(fun s ->
-        Stack.fold ~init:0 ~f:(fun acc c -> acc * 5 + score2 c) s
-      ) l |> List.sort ~compare
-  in List.nth_exn res (List.length res / 2)
+  let scores =
+    let count l = List.fold ~init:0 ~f:(fun acc c -> acc * 5 + score2 c) l in
+    List.map ~f:count l |> List.sort ~compare
+  in List.nth_exn scores (List.length scores / 2)
+
+let parse_file data =
+  let conv = function
+    | '(' -> `LParen   | ')' -> `RParen
+    | '[' -> `LBracket | ']' -> `RBracket
+    | '{' -> `LBrace   | '}' -> `RBrace
+    | '<' -> `LChevron | '>' -> `RChevron
+    | _ -> failwith "Wrong input"
+  in
+  List.map data ~f:(fun s -> String.to_list s |> List.map ~f:conv)
 
 let main file =
-  let data = Stdio.In_channel.read_lines file in
+  let data = Stdio.In_channel.read_lines file |> parse_file in
   let legal, illegal = List.partition_map data ~f:partition_line in
   Stdio.printf "Part 1 : %d\nPart 2 : %d\n" (solve1 illegal) (solve2 legal)
 
