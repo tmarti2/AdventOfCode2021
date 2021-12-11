@@ -1,4 +1,4 @@
 (executable
- (name day9)
+ (name main)
  (libraries base stdio)
 )
