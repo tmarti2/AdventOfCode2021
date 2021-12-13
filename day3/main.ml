@@ -28,7 +28,7 @@ let rec calc f pos data =
   | [] -> assert false
   | [x] -> list_to_int x
   | _ ->
-    let chosen = f (most_common_pos data) pos in
+    let chosen = f @@ most_common_pos data pos in
     List.filter data ~f:(fun l -> Poly.(List.nth_exn l pos = chosen))
     |> calc f (pos+1)
 
@@ -37,7 +37,7 @@ let solve1 data =
   (list_to_int g) * (invert g |> list_to_int)
 
 let solve2 data =
-   calc Fn.id 0 data * calc Fn.non 0 data
+   calc Fn.id 0 data * calc not 0 data
 
 let main file =
   let data = Stdio.In_channel.read_lines file |> parse_file in
