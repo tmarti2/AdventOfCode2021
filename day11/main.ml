@@ -13,23 +13,23 @@ let in_range a (x,y) =
 let get a (x,y) =
   if in_range a (x,y) then Some a.(y).(x) else None
 
-let find_neightboors a (x,y) =
+let find_neighbors a (x,y) =
   let deltas = [(-1, 0); (0, -1); (1, 0); (0, 1);(-1, -1); (1, -1); (1, 1); (-1, 1)] in
   let coords = List.map ~f:(fun (dx, dy) -> (x + dx, y + dy)) deltas in
   List.filter ~f:(in_range a) coords
 
-let inc_neightboors a (x,y) =
+let inc_neighbors a (x,y) =
   let f (x',y') =
     match get a (x',y') with
     | Some v when v > 0 && v < 9 -> a.(y').(x') <- v + 1; None
     | Some v when v = 9          -> a.(y').(x') <- 0; Some (x',y')
     | _ -> None
-  in List.filter_map ~f (find_neightboors a (x,y))
+  in List.filter_map ~f (find_neighbors a (x,y))
 
 let flash a init =
   let rec aux cpt = function
     | [] -> cpt
-    | next :: rest -> aux (cpt +1) (rest @ inc_neightboors a next)
+    | next :: rest -> aux (cpt +1) (rest @ inc_neighbors a next)
   in aux 0 init
 
 let step a =
