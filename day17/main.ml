@@ -18,7 +18,7 @@ let next_vel v =
 let test_velocity t vel =
   let rec aux maxy s v =
     if has_missed_target s t then None
-    else if has_reached_target s t then Some (max maxy s.y,vel)
+    else if has_reached_target s t then Some (max maxy s.y)
     else aux (max maxy (s.y+v.y)) {x=s.x+v.x;y=s.y+v.y} (next_vel v)
   in aux Int.min_value {x=0;y=0} vel
 
@@ -34,10 +34,12 @@ let solve t =
         )
     )
   in
-  l, Option.value_exn (List.max_elt l ~compare:(fun (my,_) (my',_) -> compare my my'))
+  l
 
-let solve1 t = let _,(my,_) = solve t in my
-let solve2 t = let l,_ = solve t in List.length l
+let solve1 t =
+  Option.value_exn (solve t |> List.max_elt ~compare:(fun my my' -> compare my my'))
+
+let solve2 t = solve t |> List.length
 
 let main file =
   let t = Stdio.In_channel.read_lines file |> parse_file in
